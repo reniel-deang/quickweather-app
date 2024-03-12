@@ -53,7 +53,6 @@ class _MainPageState extends State<MainPage> {
         humidity = weatherData['main']['humidity'].toString() + "%";
         icon = "https://openweathermap.org/img/wn/$img@2x.png";
       });
-      print(weatherData['weather'][0]['description']);
     } else if (weatherData['cod'] == "404") {
       showDialog(
         context: context,
@@ -72,7 +71,7 @@ class _MainPageState extends State<MainPage> {
           );
         },
       );
-      print(weatherData['cod']);
+
     }
     else if (weatherData['cod'] == "400") {
       showDialog(
@@ -92,7 +91,7 @@ class _MainPageState extends State<MainPage> {
           );
         },
       );
-      print(weatherData['cod']);
+
     }
     else
       {
