@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MaterialApp(
@@ -17,6 +21,54 @@ class mainpage extends StatefulWidget {
 }
 
 class _mainpageState extends State<mainpage> {
+
+  Map<String, dynamic> weatherdata ={};
+  String description = "";
+  String temperature = "";
+  String city = "";
+  String country = "";
+  String humidity = "";
+
+  void initState() {
+    // TODO: implement initState
+    setState(() {
+      getweather();
+    });
+    super.initState();
+
+  }
+
+  Future <void> getweather() async
+  {
+    final link = "https://api.openweathermap.org/data/2.5/weather?q=Arayats&appid=22001e2c36b023a5543b97049789009f&units=metric";
+    final response = await http.get(Uri.parse(link));
+    weatherdata = Map<String, dynamic>.from(jsonDecode(response.body));
+
+    if (weatherdata['cod'] == 200)
+    {
+      setState(() {
+        description = weatherdata['weather'][0]['description'].toString();
+        temperature = weatherdata['main']['temp'].toString() + "°C";
+        city = weatherdata['name'].toString();
+        country = weatherdata['sys']['country'].toString();
+        humidity = weatherdata['main']['humidity'].toString() + "%";
+      });
+      print(weatherdata['weather'][0]['description']);
+    }
+    else if(weatherdata['cod'] == "404")
+    {
+      setState(() {
+        description = "--";
+        temperature = "--";
+        city = "--";
+        country = "--";
+        humidity = "--";
+      });
+      print(weatherdata['cod']);
+    }
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,7 +151,7 @@ class _mainpageState extends State<mainpage> {
                               ),
                               SizedBox(width: 10),
                               Text(
-                                'Santa Ana',
+                                city + ", " + country,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 30,
@@ -129,7 +181,7 @@ class _mainpageState extends State<mainpage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                '20 °C',
+                                temperature,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 70,
@@ -137,7 +189,7 @@ class _mainpageState extends State<mainpage> {
                                 ),
                               ),
                               Text(
-                                'Rain',
+                                description,
                                 style:
                                 TextStyle(fontSize: 20, color: Colors.white),
                               ),
@@ -185,7 +237,7 @@ class _mainpageState extends State<mainpage> {
                               ),
                               SizedBox(width: 20),
                               Text(
-                                '20 °C',
+                                temperature,
                                 style: TextStyle(
                                     fontSize: 20, color: Colors.white),
                               )
@@ -201,7 +253,7 @@ class _mainpageState extends State<mainpage> {
                               ),
                               SizedBox(width: 20),
                               Text(
-                                '35 %',
+                                humidity,
                                 style: TextStyle(
                                     fontSize: 20, color: Colors.white),
                               )
@@ -217,7 +269,7 @@ class _mainpageState extends State<mainpage> {
                               ),
                               SizedBox(width: 20),
                               Text(
-                                'Philippines',
+                                country,
                                 style: TextStyle(
                                     fontSize: 20, color: Colors.white),
                               )
