@@ -1,76 +1,124 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     theme: ThemeData(useMaterial3: true),
-    home: mainpage(),
+    home: MainPage(),
   ));
 }
 
-class mainpage extends StatefulWidget {
-  const mainpage({Key? key}) : super(key: key);
+class MainPage extends StatefulWidget {
+  const MainPage({Key? key}) : super(key: key);
 
   @override
-  State<mainpage> createState() => _mainpageState();
+  State<MainPage> createState() => _MainPageState();
 }
 
-class _mainpageState extends State<mainpage> {
-
-  Map<String, dynamic> weatherdata ={};
+class _MainPageState extends State<MainPage> {
+  Map<String, dynamic> weatherData = {};
   String description = "";
   String temperature = "";
   String city = "";
   String country = "";
   String humidity = "";
+  String search = "";
+  String icon = "";
+  TextEditingController searchController = TextEditingController(text: "Arayat");
 
+  @override
   void initState() {
-    // TODO: implement initState
-    setState(() {
-      getweather();
-    });
     super.initState();
-
+    getWeather();
   }
 
-  Future <void> getweather() async
-  {
-    final link = "https://api.openweathermap.org/data/2.5/weather?q=Arayats&appid=22001e2c36b023a5543b97049789009f&units=metric";
+  Future<void> getWeather() async {
+    search = searchController.text;
+    final link =
+        "https://api.openweathermap.org/data/2.5/weather?q=$search&appid=22001e2c36b023a5543b97049789009f&units=metric";
     final response = await http.get(Uri.parse(link));
-    weatherdata = Map<String, dynamic>.from(jsonDecode(response.body));
+    weatherData = Map<String, dynamic>.from(jsonDecode(response.body));
 
-    if (weatherdata['cod'] == 200)
-    {
+    if (weatherData['cod'] == 200) {
+      String img = weatherData['weather'][0]['icon'];
       setState(() {
-        description = weatherdata['weather'][0]['description'].toString();
-        temperature = weatherdata['main']['temp'].toString() + "°C";
-        city = weatherdata['name'].toString();
-        country = weatherdata['sys']['country'].toString();
-        humidity = weatherdata['main']['humidity'].toString() + "%";
+        description = weatherData['weather'][0]['description'].toString();
+        temperature = weatherData['main']['temp'].toString() + "°C";
+        city = weatherData['name'].toString();
+        country = weatherData['sys']['country'].toString();
+        humidity = weatherData['main']['humidity'].toString() + "%";
+        icon = "https://openweathermap.org/img/wn/$img@2x.png";
       });
-      print(weatherdata['weather'][0]['description']);
+      print(weatherData['weather'][0]['description']);
+    } else if (weatherData['cod'] == "404") {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('City Not Found'),
+            content: Text('Please check your input and try again. '),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      print(weatherData['cod']);
     }
-    else if(weatherdata['cod'] == "404")
-    {
-      setState(() {
-        description = "--";
-        temperature = "--";
-        city = "--";
-        country = "--";
-        humidity = "--";
-      });
-      print(weatherdata['cod']);
+    else if (weatherData['cod'] == "400") {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('City cannot be blank'),
+            content: Text('Please check your input and try again.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      print(weatherData['cod']);
     }
-
+    else
+      {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Something Went Wrong'),
+              content: Text('Please try again.'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
   }
 
   @override
   Widget build(BuildContext context) {
+    String currentDate = DateFormat.yMMMMd('en_US').format(DateTime.now());
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -84,7 +132,7 @@ class _mainpageState extends State<mainpage> {
                   child: Row(
                     children: [
                       Text(
-                        'Weather App',
+                        'QuickWeather',
                         style:
                         TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
@@ -94,13 +142,25 @@ class _mainpageState extends State<mainpage> {
                 ),
               ),
             ),
-            Row(
-              children: [
-                IconButton(onPressed: () {}, icon: Icon(Icons.search)),
-                SizedBox(
-                  width: 5,
+            Expanded(
+              child: SizedBox(
+                width: 300,
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                      labelText: 'Search',
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            getWeather();
+                          });
+                        },
+                        icon: const Icon(Icons.search),
+                      ),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20))),
                 ),
-              ],
+              ),
             )
           ],
         ),
@@ -111,6 +171,7 @@ class _mainpageState extends State<mainpage> {
           return SingleChildScrollView(
             child: Column(
               children: [
+                SizedBox(height: 20,),
                 Padding(
                   padding: EdgeInsets.all(10),
                   child: Container(
@@ -159,11 +220,7 @@ class _mainpageState extends State<mainpage> {
                                 ),
                               ),
                               SizedBox(width: 20),
-                              ElevatedButton.icon(
-                                onPressed: () {},
-                                icon: Icon(Icons.swap_horiz_sharp),
-                                label: Text('change'),
-                              ),
+
                             ],
                           ),
                         ),
@@ -171,8 +228,9 @@ class _mainpageState extends State<mainpage> {
                           children: [
                             SizedBox(width: 15),
                             Text(
-                              'Wednesday, 13 May',
-                              style: TextStyle(fontSize: 20, color: Colors.grey),
+                              currentDate,
+                              style:
+                              TextStyle(fontSize: 20, color: Colors.grey),
                             ),
                           ],
                         ),
@@ -190,10 +248,14 @@ class _mainpageState extends State<mainpage> {
                               ),
                               Text(
                                 description,
-                                style:
-                                TextStyle(fontSize: 20, color: Colors.white),
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white),
                               ),
-                              Image.asset('assets/cloud-sunny.png',height: 250,)
+                              if (icon.isNotEmpty) // Check if icon is not empty
+                                Image.network(
+                                  icon,
+                                  height: 150,
+                                ),
                             ],
                           ),
                         ),
