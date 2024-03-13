@@ -4,6 +4,7 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
+
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -38,10 +39,24 @@ class _MainPageState extends State<MainPage> {
 
   Future<void> getWeather() async {
     search = searchController.text;
-    final link =
-        "https://api.openweathermap.org/data/2.5/weather?q=$search&appid=22001e2c36b023a5543b97049789009f&units=metric";
-    final response = await http.get(Uri.parse(link));
-    weatherData = Map<String, dynamic>.from(jsonDecode(response.body));
+
+    try
+    {
+      final link =
+          "https://api.openweathermap.org/data/2.5/weather?q=$search&appid=22001e2c36b023a5543b97049789009f&units=metric";
+      final response = await http.get(Uri.parse(link));
+      weatherData = Map<String, dynamic>.from(jsonDecode(response.body));
+    }
+    catch(e) {
+      description = "--";
+      temperature = "--";
+      city = "--";
+      country = "--";
+      humidity = "--";
+      search = "";
+      icon = "";
+    }
+
 
     if (weatherData['cod'] == 200) {
       String img = weatherData['weather'][0]['icon'];
@@ -100,7 +115,7 @@ class _MainPageState extends State<MainPage> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text('Something Went Wrong'),
-              content: Text('Please try again.'),
+              content: Text('Please Check Your Internet Connection and try again.'),
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
