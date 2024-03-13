@@ -31,6 +31,7 @@ class _MainPageState extends State<MainPage> {
   String icon = "";
   TextEditingController searchController = TextEditingController(text: "Arayat");
 
+
   @override
   void initState() {
     super.initState();
@@ -86,7 +87,6 @@ class _MainPageState extends State<MainPage> {
           );
         },
       );
-
     }
     else if (weatherData['cod'] == "400") {
       showDialog(
@@ -135,16 +135,19 @@ class _MainPageState extends State<MainPage> {
     String currentDate = DateFormat.yMMMMd('en_US').format(DateTime.now());
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 80,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
+
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: InkWell(
                   onTap: () {},
                   child: Row(
                     children: [
+
                       Text(
                         'QuickWeather',
                         style:
