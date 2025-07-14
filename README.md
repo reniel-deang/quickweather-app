@@ -26,7 +26,7 @@
 
 ---
 
-## 🖼️ Screenshots (Coming Soon)
+## 🖼️ Screenshots
 
 | Weather Info | Not Found |
 |---------------|--------------|
